@@ -7,6 +7,9 @@ import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
 
+import { filter, map, max, toArray } from 'rxjs/operators';
+import {Observable, from} from 'rxjs';
+
 @Component({
   selector: 'app-todo-list',
   templateUrl: './todo-list.component.html',
@@ -32,7 +35,7 @@ export class TodoListComponent implements OnInit {
   minDate = new Date();
   maxDate = new Date(2020, 5, 30);
 
-  displayedColumns: string[] = ['select', 'id', 'username', 'created', 'dueDate', 'title', 'action'];
+  displayedColumns: string[] = ['select', 'index', 'username', 'created', 'dueDate', 'title', 'action'];
   selection = new SelectionModel<ITodo>(true, []);
   dataSource = new MatTableDataSource<ITodo>();
 
@@ -64,31 +67,42 @@ export class TodoListComponent implements OnInit {
   filterTodoList(filterValue: string): void {
     const searchValue = this.searchForm.value.searchValue.trim().toLowerCase();
     let newTodoList = null;
+
     if (filterValue === 'done') {
-      newTodoList = this.todoList.filter(item => {
-        return item.completed;
-      });
+      newTodoList = from(this.todoList).pipe(
+        filter(vl => vl.completed),
+        toArray()
+       )
     } else if (filterValue === 'undone') {
-      newTodoList = this.todoList.filter(item => {
-        return !item.completed;
-      });
+      newTodoList = from(this.todoList).pipe(
+        filter(vl => !vl.completed),
+        toArray()
+       )
     } else if (filterValue === 'all') {
-      newTodoList = this.todoList.filter(item => {
-        return item.completed || !item.completed;
-      });
+      newTodoList = from(this.todoList).pipe(
+        filter(vl => vl.completed || !vl.completed),
+        toArray()
+       )
     } else if (filterValue === 'title') {
-      newTodoList = this.todoList.filter(item => {
-        return item.title.indexOf(searchValue) !== -1;
-      });
+      newTodoList = from(this.todoList).pipe(
+        filter(vl => vl.title.indexOf(searchValue) !== -1),
+        toArray()
+       )
     }
 
-    this.dataSource.data = newTodoList;
+    newTodoList.subscribe(vl => this.dataSource.data = vl);
   }
 
   addTodo(form): void {
-    const newTodo = {
+    let maxId: number = 1;
+    from(this.todoList).pipe(
+      map(vl => vl.id),
+      max()
+     ).subscribe(vl => maxId = vl);
+
+    const newTodo: ITodo = {
       userId: this.addTodoForm.value.author.userId,
-      id: this.todoList.length + 1,
+      id: maxId + 1,
       username: this.addTodoForm.value.author.username,
       title: this.addTodoForm.value.newTodo,
       completed: false,
@@ -122,7 +136,7 @@ export class TodoListComponent implements OnInit {
   }
 
   cancelTodoItem(): void {
-    const foundIndex = this.todoList.findIndex(item => item.id === this.prevRowData.id);
+    const foundIndex: number = this.todoList.findIndex(item => item.id === this.prevRowData.id);
     this.todoList[foundIndex] = this.prevRowData;
     this.dataSource.data = this.todoList;
     this.activeRowId = -1;
