@@ -21,11 +21,17 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatSelectModule } from '@angular/material/select';
 import { MatGridListModule } from '@angular/material/grid-list';
+import { FilterTodoComponent } from './filter-todo/filter-todo.component';
+import { AddTodoComponent } from './add-todo/add-todo.component';
+import { SearchTodoComponent } from './search-todo/search-todo.component';
 
 @NgModule({
   declarations: [
     AppComponent,
-    TodoListComponent
+    TodoListComponent,
+    FilterTodoComponent,
+    AddTodoComponent,
+    SearchTodoComponent
   ],
   imports: [
     BrowserModule,

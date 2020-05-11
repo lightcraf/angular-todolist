@@ -1,0 +1,12 @@
+.search-form {
+    margin-top: 24px;
+    padding-right: 30px;
+
+    @media all and (max-width: 992px) {
+        padding-right: 0;
+    }
+}
+
+.form-control {
+    width: 100%;
+}

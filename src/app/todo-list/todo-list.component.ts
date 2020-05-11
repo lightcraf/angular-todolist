@@ -1,14 +1,13 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import ITodo from '../service/ITodo';
+import IUser from '../service/IUser';
 import { TodolistService } from '../service/todolist.service';
-import { FormBuilder, Validators } from '@angular/forms';
 import { SelectionModel } from '@angular/cdk/collections';
 import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
-
 import { filter, map, max, toArray } from 'rxjs/operators';
-import {Observable, from} from 'rxjs';
+import { from } from 'rxjs';
 
 @Component({
   selector: 'app-todo-list',
@@ -17,23 +16,10 @@ import {Observable, from} from 'rxjs';
 })
 export class TodoListComponent implements OnInit {
   todoList: ITodo[];
-  users: {userId: number; username: string;}[];
-
-  addTodoForm = this.formBuilder.group({
-    newTodo: ['', [Validators.required, Validators.minLength(1)]],
-    newDueDate: ['', [Validators.required]],
-    author: ['', [Validators.required]]
-  });
-  searchForm = this.formBuilder.group({
-    searchValue: ['']
-  });
-
+  users: IUser[];
   activeRowId: number;
   prevRowData: ITodo;
   isEditActive: boolean = false;
-
-  minDate = new Date();
-  maxDate = new Date(2020, 5, 30);
 
   displayedColumns: string[] = ['select', 'index', 'username', 'created', 'dueDate', 'title', 'action'];
   selection = new SelectionModel<ITodo>(true, []);
@@ -43,8 +29,7 @@ export class TodoListComponent implements OnInit {
   @ViewChild(MatPaginator, { static: true }) paginator: MatPaginator;
 
   constructor(
-    private todoService: TodolistService,
-    private formBuilder: FormBuilder
+    private todoService: TodolistService
   ) {}
 
   ngOnInit(): void {
@@ -64,36 +49,41 @@ export class TodoListComponent implements OnInit {
     });
   }
 
-  filterTodoList(filterValue: string): void {
-    const searchValue = this.searchForm.value.searchValue.trim().toLowerCase();
+  onFilterTodoByAuthor(event): void {
+    const searchValue = event.value.userId;
+
+    from(this.todoList).pipe(
+      filter(vl => vl.userId === searchValue),
+      toArray()
+     ).subscribe(vl => this.dataSource.data = vl);
+  }
+
+  onFilterTodoList(filterValue?: boolean): void {
     let newTodoList = null;
 
-    if (filterValue === 'done') {
-      newTodoList = from(this.todoList).pipe(
-        filter(vl => vl.completed),
-        toArray()
-       )
-    } else if (filterValue === 'undone') {
-      newTodoList = from(this.todoList).pipe(
-        filter(vl => !vl.completed),
-        toArray()
-       )
-    } else if (filterValue === 'all') {
+    if (filterValue === undefined) {
       newTodoList = from(this.todoList).pipe(
         filter(vl => vl.completed || !vl.completed),
         toArray()
-       )
-    } else if (filterValue === 'title') {
+      )
+    } else {
       newTodoList = from(this.todoList).pipe(
-        filter(vl => vl.title.indexOf(searchValue) !== -1),
+        filter(vl => vl.completed === filterValue),
         toArray()
-       )
+      )
     }
 
     newTodoList.subscribe(vl => this.dataSource.data = vl);
   }
 
-  addTodo(form): void {
+  onSearchTodo(searchValue: string): void {
+    from(this.todoList).pipe(
+      filter(vl => vl.title.indexOf(searchValue) !== -1),
+      toArray()
+      ).subscribe(vl => this.dataSource.data = vl);
+  }
+
+  onAddTodo(form): void {
     let maxId: number = 1;
     from(this.todoList).pipe(
       map(vl => vl.id),
@@ -101,17 +91,16 @@ export class TodoListComponent implements OnInit {
      ).subscribe(vl => maxId = vl);
 
     const newTodo: ITodo = {
-      userId: this.addTodoForm.value.author.userId,
+      userId: form.userId,
       id: maxId + 1,
-      username: this.addTodoForm.value.author.username,
-      title: this.addTodoForm.value.newTodo,
+      username: form.username,
+      title: form.title,
       completed: false,
       created: Date.now(),
-      dueDate: Date.parse(this.addTodoForm.value.newDueDate)
+      dueDate: form.dueDate
     };
 
     this.todoService.addTodoList(newTodo);
-    form.resetForm()
   }
 
   editTodoItem(todo: ITodo): void {

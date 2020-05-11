@@ -1,0 +1,6 @@
+<form class="search-form" [formGroup]="searchForm">
+    <mat-form-field class="form-control">
+        <mat-label>Search in title</mat-label>
+        <input matInput formControlName="searchValue" (keyup)="onSearchTodo()">
+    </mat-form-field>
+</form>

@@ -1,0 +1,13 @@
+.add-todo-form {
+    padding-right: 30px;
+
+    @media all and (max-width: 992px) {
+        padding-right: 0;
+    }
+
+    .form-control {
+        width: 100%;
+        display: block;
+        margin-bottom: 6px;
+    }
+}

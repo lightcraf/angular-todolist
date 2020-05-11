@@ -1,0 +1,23 @@
+<form class="add-todo-form" #todoForm="ngForm" [formGroup]="addTodoForm" (ngSubmit)="onAddTodo(todoForm)">
+    <mat-form-field class="form-control">
+        <mat-label>Todo</mat-label>
+        <input matInput formControlName="todoTitle">
+    </mat-form-field>
+
+    <mat-form-field class="form-control">
+        <mat-label>Choose a due date</mat-label>
+        <input matInput [matDatepicker]="picker" [min]="minDate" [max]="maxDate"
+            formControlName="dueDate">
+        <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+        <mat-datepicker #picker></mat-datepicker>
+    </mat-form-field>
+
+    <mat-form-field class="form-control">
+        <mat-label>Author</mat-label>
+        <mat-select formControlName="author">
+            <mat-option *ngFor="let user of users" [value]="user">{{user.username}}</mat-option>
+        </mat-select>
+    </mat-form-field>
+    
+    <button mat-raised-button color="primary" type="submit" [disabled]="!addTodoForm.valid">Add</button>
+</form>

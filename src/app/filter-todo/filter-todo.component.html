@@ -1,0 +1,13 @@
+<div class="filter">
+    <span>Filter: </span>
+    <button class="filter__item" mat-button color="primary" (click)="onFilterTodoList()">All</button>
+    <button class="filter__item" mat-button color="primary" (click)="onFilterTodoList(true)">Done</button>
+    <button class="filter__item" mat-button color="primary" (click)="onFilterTodoList(false)">Undone</button>
+
+    <mat-form-field class="filter__item">
+        <mat-label>Author</mat-label>
+        <mat-select (selectionChange)="onFilterTodoByAuthor($event)">
+            <mat-option *ngFor="let user of users" [value]="user">{{user.username}}</mat-option>
+        </mat-select>
+    </mat-form-field>
+</div>
