@@ -15,15 +15,16 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSortModule } from '@angular/material/sort';
-import { MatIconModule } from '@angular/material/icon';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatSelectModule } from '@angular/material/select';
-import { MatGridListModule } from '@angular/material/grid-list';
 import { FilterTodoComponent } from './filter-todo/filter-todo.component';
 import { AddTodoComponent } from './add-todo/add-todo.component';
 import { SearchTodoComponent } from './search-todo/search-todo.component';
+import { MatMenuModule } from '@angular/material/menu';
+import { EditTodoComponent } from './edit-todo/edit-todo.component';
+import { DeleteTodoComponent } from './delete-todo/delete-todo.component';
 
 @NgModule({
   declarations: [
@@ -31,7 +32,9 @@ import { SearchTodoComponent } from './search-todo/search-todo.component';
     TodoListComponent,
     FilterTodoComponent,
     AddTodoComponent,
-    SearchTodoComponent
+    SearchTodoComponent,
+    EditTodoComponent,
+    DeleteTodoComponent
   ],
   imports: [
     BrowserModule,
@@ -45,12 +48,11 @@ import { SearchTodoComponent } from './search-todo/search-todo.component';
     MatInputModule,
     MatButtonModule,
     MatSortModule,
-    MatIconModule,
     MatPaginatorModule,
     MatDatepickerModule,
     MatNativeDateModule,
     MatSelectModule,
-    MatGridListModule,
+    MatMenuModule,
     AngularFireModule.initializeApp(environment.firebaseConfig),
     AngularFirestoreModule
   ],

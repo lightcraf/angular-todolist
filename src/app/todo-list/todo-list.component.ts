@@ -8,6 +8,10 @@ import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
 import { filter, map, max, toArray } from 'rxjs/operators';
 import { from } from 'rxjs';
+import { MatDialog } from '@angular/material/dialog';
+import { AddTodoComponent } from '../add-todo/add-todo.component';
+import { EditTodoComponent } from '../edit-todo/edit-todo.component';
+import { DeleteTodoComponent } from '../delete-todo/delete-todo.component';
 
 @Component({
   selector: 'app-todo-list',
@@ -17,10 +21,6 @@ import { from } from 'rxjs';
 export class TodoListComponent implements OnInit {
   todoList: ITodo[];
   users: IUser[];
-  activeRowId: number;
-  prevRowData: ITodo;
-  isEditActive: boolean = false;
-
   displayedColumns: string[] = ['select', 'index', 'username', 'created', 'dueDate', 'title', 'action'];
   selection = new SelectionModel<ITodo>(true, []);
   dataSource = new MatTableDataSource<ITodo>();
@@ -29,7 +29,8 @@ export class TodoListComponent implements OnInit {
   @ViewChild(MatPaginator, { static: true }) paginator: MatPaginator;
 
   constructor(
-    private todoService: TodolistService
+    private todoService: TodolistService,
+    public dialog: MatDialog
   ) {}
 
   ngOnInit(): void {
@@ -85,6 +86,7 @@ export class TodoListComponent implements OnInit {
 
   onAddTodo(form): void {
     let maxId: number = 1;
+
     from(this.todoList).pipe(
       map(vl => vl.id),
       max()
@@ -103,46 +105,60 @@ export class TodoListComponent implements OnInit {
     this.todoService.addTodoList(newTodo);
   }
 
-  editTodoItem(todo: ITodo): void {
-    this.activeRowId = todo.id;
-    this.isEditActive = !this.isEditActive;
-
-    if (this.isEditActive) {
-      this.prevRowData = Object.assign({}, todo);
-    } else {
-      this.cancelTodoItem();
-    }
-  }
-
-  saveTodoItem(todo: ITodo): void {
-    if (todo.id === this.prevRowData.id) {
-      this.activeRowId = -1;
-      this.isEditActive = false;
-      this.prevRowData = Object.assign({}, todo);
-
-      this.todoService.updateTodoList(todo);
-    }
-  }
-
-  cancelTodoItem(): void {
-    const foundIndex: number = this.todoList.findIndex(item => item.id === this.prevRowData.id);
-    this.todoList[foundIndex] = this.prevRowData;
-    this.dataSource.data = this.todoList;
-    this.activeRowId = -1;
-    this.isEditActive = false;
-  }
-
   deleteTodoItem(todo: ITodo): void {
-    this.activeRowId = -1;
-    this.isEditActive = false;
     this.todoService.deleteTodoList(todo);
   }
 
   toggleCompleted(todo: ITodo): void {
+    console.log(todo);
+    todo.completed = !todo.completed;
+    console.log(todo);
     this.todoService.updateTodoList(todo);
   }
 
-  checkboxLabel(row?: ITodo): string {
-    return `${this.selection.isSelected(row) ? 'deselect' : 'select'} row ${row.id + 1}`;
+  openAddTodoDialog(): void {
+    const dialogRef = this.dialog.open(AddTodoComponent, {
+      width: '500px',
+      data: { users: this.users },
+      disableClose: true
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result === 'close') {
+        return;
+      } else {
+        this.onAddTodo(result);
+      }
+    });
+  }
+
+  openEditDialog(todo: ITodo): void {
+    const dialogRef = this.dialog.open(EditTodoComponent, {
+      width: '500px',
+      data: { todo: todo },
+      disableClose: true
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result === 'close') {
+        return;
+      } else {
+        todo.title = result.title;
+        this.todoService.updateTodoList(todo);
+      }
+    });
+  }
+
+  openDeleteDialog(todo: ITodo): void {
+    const dialogRef = this.dialog.open(DeleteTodoComponent, {
+      width: '400px',
+      disableClose: true
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.deleteTodoItem(todo);
+      }
+    });
   }
 }

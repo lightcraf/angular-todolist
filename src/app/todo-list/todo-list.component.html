@@ -1,87 +1,63 @@
 <div class="wrapper">
-    <div class="row">
-        <div class="side-menu">
-            <app-add-todo [users]="users" (addTodo)="onAddTodo($event)"></app-add-todo>
+    <div class="header">
+        <button mat-stroked-button color="primary" (click)="openAddTodoDialog()">Add todo</button>
+        <div class="search">
             <app-search-todo (searchTodo)="onSearchTodo($event)"></app-search-todo>
         </div>
-        <div class="todolist-wrapper">
-            <app-filter-todo [users]="users" 
-                (filterTodoList)="onFilterTodoList($event)" 
-                (filterTodoByAuthor)="onFilterTodoByAuthor($event)">
-            </app-filter-todo>
-            <div class="mat-elevation-z8">
-                <table class="todolist" mat-table [dataSource]="dataSource" matSort>
-                    <ng-container matColumnDef="select">
-                        <th mat-header-cell *matHeaderCellDef>Select</th>
-                        <td mat-cell *matCellDef="let row">
-                            <mat-checkbox (change)="toggleCompleted(row)" [(ngModel)]="row.completed"
-                                [aria-label]="checkboxLabel(row)">
-                            </mat-checkbox>
-                        </td>
-                    </ng-container>
+    </div>
+    
+    <app-filter-todo [users]="users" (filterTodoList)="onFilterTodoList($event)"
+        (filterTodoByAuthor)="onFilterTodoByAuthor($event)">
+    </app-filter-todo>
 
-                    <ng-container matColumnDef="index">
-                        <th mat-header-cell *matHeaderCellDef>No.</th>
-                        <td mat-cell *matCellDef="let row; let i = index;">{{paginator.pageSize * paginator.pageIndex + i + 1}}</td>
-                    </ng-container>
+    <div class="mat-elevation-z8">
+        <table class="todolist-table" mat-table [dataSource]="dataSource" matSort>
+            <ng-container matColumnDef="select">
+                <th mat-header-cell *matHeaderCellDef>Select</th>
+                <td mat-cell *matCellDef="let row">
+                    <mat-checkbox (change)="toggleCompleted(row)" [checked]="row.completed"
+                        [aria-label]="row.id">
+                    </mat-checkbox>
+                </td>
+            </ng-container>
 
-                    <ng-container matColumnDef="username">
-                        <th mat-header-cell *matHeaderCellDef mat-sort-header>Author</th>
-                        <td mat-cell *matCellDef="let todo">{{todo.username}}</td>
-                    </ng-container>
+            <ng-container matColumnDef="index">
+                <th mat-header-cell *matHeaderCellDef>No.</th>
+                <td mat-cell *matCellDef="let row; let i = index;">{{paginator.pageSize * paginator.pageIndex + i + 1}}
+                </td>
+            </ng-container>
 
-                    <ng-container matColumnDef="created">
-                        <th mat-header-cell *matHeaderCellDef mat-sort-header>Created</th>
-                        <td mat-cell *matCellDef="let todo">{{todo.created | date:'d LLLL y'}}</td>
-                    </ng-container>
+            <ng-container matColumnDef="username">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header>Author</th>
+                <td mat-cell *matCellDef="let todo">{{todo.username}}</td>
+            </ng-container>
 
-                    <ng-container matColumnDef="dueDate">
-                        <th mat-header-cell *matHeaderCellDef mat-sort-header>Due date</th>
-                        <td mat-cell *matCellDef="let todo">{{todo.dueDate | date:'d LLLL y'}}</td>
-                    </ng-container>
+            <ng-container matColumnDef="created">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header>Created</th>
+                <td mat-cell *matCellDef="let todo">{{todo.created | date:'d LLLL y'}}</td>
+            </ng-container>
 
-                    <ng-container matColumnDef="title">
-                        <th mat-header-cell *matHeaderCellDef mat-sort-header>Title</th>
+            <ng-container matColumnDef="dueDate">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header>Due date</th>
+                <td mat-cell *matCellDef="let todo">{{todo.dueDate | date:'d LLLL y'}}</td>
+            </ng-container>
 
-                        <ng-container *matCellDef="let todo">
-                            <td mat-cell *ngIf="activeRowId !== todo.id; else elseBlock">{{todo.title}}</td>
-                            <ng-template #elseBlock>
-                                <td mat-cell>
-                                    <mat-form-field class="form-control">
-                                        <input matInput [(ngModel)]="todo.title">
-                                    </mat-form-field>
-                                </td>
-                            </ng-template>
-                        </ng-container>
-                    </ng-container>
+            <ng-container matColumnDef="title">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header>Title</th>
+                <td mat-cell *matCellDef="let todo">{{todo.title}}</td>
+            </ng-container>
 
-                    <ng-container matColumnDef="action">
-                        <th mat-header-cell *matHeaderCellDef>Action</th>
-                        <td mat-cell *matCellDef="let todo">
-                            <button mat-icon-button aria-label="save note" (click)="saveTodoItem(todo)"
-                                *ngIf="activeRowId == todo.id">
-                                <mat-icon class="icon-green">done</mat-icon>
-                            </button>
-                            <button mat-icon-button aria-label="cancel note" (click)="cancelTodoItem()"
-                                *ngIf="activeRowId == todo.id">
-                                <mat-icon class="icon-yellow">cancel</mat-icon>
-                            </button>
-                            <button mat-icon-button color="warn" aria-label="delete note" (click)="deleteTodoItem(todo)"
-                                *ngIf="activeRowId == todo.id">
-                                <mat-icon>delete_forever</mat-icon>
-                            </button>
-                            <button mat-icon-button color="primary" aria-label="edit note" (click)="editTodoItem(todo)"
-                                *ngIf="activeRowId !== todo.id || !isEditActive">
-                                <mat-icon>edit</mat-icon>
-                            </button>
-                        </td>
-                    </ng-container>
+            <ng-container matColumnDef="action">
+                <th mat-header-cell *matHeaderCellDef>Action</th>
+                <td mat-cell *matCellDef="let todo">
+                    <button mat-button color="primary" (click)="openEditDialog(todo)">Edit</button>
+                    <button mat-button color="primary" (click)="openDeleteDialog(todo)">Delete</button>
+                </td>
+            </ng-container>
 
-                    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-                    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-                </table>
-                <mat-paginator [pageSizeOptions]="[10, 20, 50]" showFirstLastButtons></mat-paginator>
-            </div>
-        </div>
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+        </table>
+        <mat-paginator [pageSizeOptions]="[10, 20, 50]" showFirstLastButtons></mat-paginator>
     </div>
 </div>

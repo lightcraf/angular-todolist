@@ -1,0 +1,9 @@
+<form #todoForm="ngForm" [formGroup]="editTodoForm" (ngSubmit)="onEditTodo(todoForm)">
+    <mat-form-field class="form-control">
+        <mat-label>Todo title</mat-label>
+        <textarea matInput formControlName="todoTitle"></textarea>
+    </mat-form-field>
+    
+    <button mat-raised-button color="primary" type="submit" [disabled]="!editTodoForm.valid">Save</button>
+    <button type="button" class="btn-close" mat-button mat-dialog-close (click)="closeDialog()">Close</button>
+</form>

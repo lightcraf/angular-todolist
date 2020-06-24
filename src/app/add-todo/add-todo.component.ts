@@ -1,7 +1,6 @@
-import { Component, OnInit } from '@angular/core';
-import { Input, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, Inject } from '@angular/core';
 import { FormBuilder, Validators } from '@angular/forms';
-import IUser from '../service/IUser';
+import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 
 @Component({
   selector: 'app-add-todo',
@@ -16,16 +15,18 @@ export class AddTodoComponent implements OnInit {
   });
 
   minDate: Date = new Date();
-  maxDate: Date = new Date(2020, 5, 30);
+  maxDate: Date = new Date(2022, 5, 30);
 
   constructor(
-    private formBuilder: FormBuilder
+    private formBuilder: FormBuilder,
+    public dialogRef: MatDialogRef<AddTodoComponent>,
+    @Inject(MAT_DIALOG_DATA) public data: any
   ) { }
 
-  @Input() users: IUser[];
-  @Output() addTodo = new EventEmitter<any>();
+  ngOnInit(): void {
+  }
 
-  onAddTodo(form) {
+  onAddTodo(form): void {
     const newTodo = {
       userId: this.addTodoForm.value.author.userId,
       username: this.addTodoForm.value.author.username,
@@ -33,11 +34,11 @@ export class AddTodoComponent implements OnInit {
       dueDate: Date.parse(this.addTodoForm.value.dueDate)
     };
 
-    this.addTodo.emit(newTodo);
+    this.dialogRef.close(newTodo);
     form.resetForm();
   }
 
-  ngOnInit(): void {
+  closeDialog(): void {
+    this.dialogRef.close('close');
   }
-
 }
